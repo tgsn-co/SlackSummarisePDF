@@ -20,7 +20,6 @@ from langchain_core.output_parsers import StrOutputParser
 
 
 from dotenv import load_dotenv
-# Use environment variables to manage sensitive information securely
 load_dotenv()
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
 SLACK_APP_TOKEN = os.environ.get('SLACK_APP_TOKEN')
