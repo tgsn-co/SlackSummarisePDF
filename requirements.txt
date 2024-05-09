@@ -1,0 +1,7 @@
+requests
+PyMuPDF
+slack-bolt
+slack-sdk
+langchain-core
+langchain-openai
+python-dotenv
