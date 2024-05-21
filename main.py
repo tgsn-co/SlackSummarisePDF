@@ -1,54 +1,28 @@
-"""
-Created on Tue May  7 12:23:34 2024
-
-@author: lucas
-"""
-
 import os
+import urllib.request, urllib.parse
+
 import requests
 import fitz  # PyMuPDF
+import os
+import urllib
+from openai import OpenAI
 
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 from slack_bolt import App
-
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
+import json
 
 
-from dotenv import load_dotenv
-load_dotenv()
-SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
-SLACK_APP_TOKEN = os.environ.get('SLACK_APP_TOKEN')
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 OPENAI_API_KEY  = os.environ.get('OPENAI_API_KEY')
 
-def SlackApp(document: str) -> str:
-    SlackAppTemplate = """You are part of a helpful assistant used to support project design and bid writing for a company called TGSN that works in the development, humanitarian and defense sectors.
-    You are a tool used to provide a summary of a document. 
-    You will be given a document in the form of text, provide a detailed summary of the document.
-    Only output the document summary.
-    
-    Document: {document}
-    """
-    prompt = ChatPromptTemplate.from_template(SlackAppTemplate)
-    model = ChatOpenAI(model="gpt-4-0125-preview", temperature=0.5)
-    chain = (
-        {"document": RunnablePassthrough()}
-        | prompt
-        | model
-        | StrOutputParser()
-    )
-    return chain.invoke(document)
+OpenAI_client = OpenAI()
+app = App(token=BOT_TOKEN)
+client = WebClient(token=BOT_TOKEN)
 
 
-# Get file from URL
 def get_pdf_text(url):
-    headers = {
-        "Authorization": f"Bearer {SLACK_BOT_TOKEN}"
-    }
+    "Retrieves a PDF from a private URL from Slack then returns all of the text."
+    headers = {"Authorization": f"Bearer {BOT_TOKEN}"}
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         with fitz.open(stream=response.content, filetype="pdf") as doc:
@@ -58,38 +32,62 @@ def get_pdf_text(url):
             return text
     else:
         return "Failed to retrieve the document."
+    
+def SlackApp(document: str) -> str:
+    "Sends some text to OpenAI asking for it to be summarised"
+    completion = OpenAI_client.chat.completions.create(
+    model="gpt-4o-2024-05-13",
+    messages=[
+        {"role": "system", "content": "You are part of a helpful assistant used to support project design and bid writing for a company called TGSN that works in the development, humanitarian and defense sectors. You are a tool used to provide a summary of a document. You will be given a document in the form of text, provide a detailed summary of the document. Only output the document summary."},
+        {"role": "user", "content": document}
+    ]
+    )
+    return completion.choices[0].message.content
 
-
-# Event API & Web API
-app = App(token=SLACK_BOT_TOKEN)
-client = WebClient(token=SLACK_BOT_TOKEN)
-
-@app.event("file_shared")
-def handle_message_events(body, logger):
-    print(str(body["event"]))
-    file_id = body["event"]['file_id']
-    channel_id = body["event"]["channel_id"]  
-    thread_ts = body["event"]["event_ts"] #Fix this
-    try:
+def send_text_response(event_body, response_text, file_info):
+    "Responds the Slack trigger by posting a response into the chat where the trigger comes from. "
+    print("Messaging Slack...")
+    SLACK_URL = "https://slack.com/api/chat.postMessage"
+    channel_id = event_body['event']['channel_id']
+    thread_ts = file_info['shares']['public'][channel_id][0]['thread_ts']
+    data = urllib.parse.urlencode(
+        (
+            ("token", os.environ["BOT_TOKEN"]),
+            ("channel", channel_id),
+            ("text", response_text),
+            (thread_ts, thread_ts)
+        )
+    )
+    data = data.encode("ascii")
+    
+    request = urllib.request.Request(SLACK_URL, data=data, method="POST")
+    request.add_header( "Content-Type", "application/x-www-form-urlencoded" )
+    
+    x = urllib.request.urlopen(request).read()
+    
+def handler(event, context):
+    "The main Lambda handler which orchestrates the Lambda Function"
+    print(f"Received event:\n{event}\nWith context:\n{context}")
+    body = json.loads(event['body'])
+    headers = event.get('headers', {})
+    if headers.get('X-Slack-Retry-Num') is None:
+        # print(f"body = {body}")
+        file_id = body['event']['file']['id']
+        # print(file_id)
         response = client.files_info(file=file_id)
+        # print(f"response = {response}")
         file_info = response['file']
+        
         if file_info['mimetype'] == 'application/pdf':
             private_url = file_info['url_private']
-            text = get_pdf_text(private_url)
-
-            private_url = file_info['url_private']
-            text = get_pdf_text(private_url)
             
-            if text != "Failed to retrieve the document.":
-                summary = SlackApp(text)
-                client.chat_postMessage(channel=channel_id, thread_ts=thread_ts, text=f"Summary: {summary}")
-            else:
-                client.chat_postMessage(channel=channel_id, thread_ts=thread_ts, text="Failed to retrieve and process the document.")
-
-    except Exception as e:
-        print(f"Error retrieving file: {e}")
-        client.chat_postMessage(channel=channel_id, thread_ts=thread_ts,  text=f"An error occurred: {str(e)}")
-
-
-if __name__ == "__main__":
-    SocketModeHandler(app, SLACK_APP_TOKEN).start()
+            text = get_pdf_text(private_url)
+            # print(f"text: {text}")
+            summary = SlackApp(text)
+            # print(f"summary: {summary}")
+        send_text_response(body, summary, file_info)
+    
+    return {
+        'statusCode': 200,
+        'body': 'OK'
+    }
