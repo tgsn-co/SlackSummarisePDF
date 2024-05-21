@@ -66,7 +66,7 @@ def send_text_response(event_body, response_text, file_info):
     x = urllib.request.urlopen(request).read()
     
 def handler(event, context):
-    "The main Lambda handler which orchestrates the Lambda Function"
+    "The main Lambda handler which orchestrates the Lambda Function and sends an acknowledgement back to slack."
     print(f"Received event:\n{event}\nWith context:\n{context}")
     body = json.loads(event['body'])
     headers = event.get('headers', {})
