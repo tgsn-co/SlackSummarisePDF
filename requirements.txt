@@ -1,7 +1,5 @@
 requests
-PyMuPDF
-slack-bolt
-slack-sdk
-langchain-core
-langchain-openai
-python-dotenv
+PyMuPDF==1.23.25
+slack-bolt==1.18.1
+slack-sdk==3.27.1
+openai==1.12.0
