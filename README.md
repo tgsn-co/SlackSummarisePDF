@@ -24,7 +24,11 @@ The following environment variables need to be set in the Lambda function config
 
 --**Failure to retrieve PDF:** Faliure to retrieve the document the get_pdf_text function will return "Failed to retrieve the document." This will be sent to OpenAI, summarised and sent to the channel. This will likely show up in the message.
 --**Failure to Extract Text:** If the text cannot be extracted using the PYMuPDF module either an empty string will be returned this will be reflected in the request to OpenAI and the slack message. If an error is thrown the  funtion will stop and an error message will be returned to the CloudWatch Logs.
---**OpenAI Down:** If OpenAI may respond with an error code which will be posted to Slack
+
+--**OpenAI Down:** If OpenAI may respond with an error code which will be posted to Slack.
+
 --**Send_text_response:** If there is a problem sending the message to slack an error may be shown in the CloudWatch Logs. Howver, the message to slack may just fail to post and this may not show a log and onyl be noticed from the lack of response in the channel.
+
 --**AWS problem:** If there is a problem with AWS this shown in the AWS consol for the Lambda function.
+
 --**Slack changes:** We should be notified of any changes to the Slack API by email as a registered APP creator.
