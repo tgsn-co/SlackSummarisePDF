@@ -6,6 +6,8 @@ Specifically, it allows you to setup a Slack bot that takes in a pdf file and ca
 
 This README provides an overview and setup instructions for an AWS Lambda function that integrates with Slack to retrieve PDF documents, summarize their content using OpenAI, and send the summary back to Slack.
 
+![alt text](https://github.com/tgsn-co/SlackSummarisePDF/blob/AWS-Lambda-Implementation/SlackSummarisePDF.png "App Diagram")
+
 ## Prerequisites
 
 1. **AWS Account**: You need an AWS account to create and deploy the Lambda function.
