@@ -65,11 +65,11 @@ def handler(event, context):
         'body': challenge_answer
     }
 ```
-Update the Docker image with the new code and push it the AWS Lambda function.
+    Update the Docker image with the new code and push it the AWS Lambda function.
 
 2. Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
 
-Our Gateway will now return the “challenge” value in our lambda function.
+    Our Gateway will now return the “challenge” value in our lambda function.
 
 3. Configure your Slack app to subscribe to the file-uploaded event and set the request URL to the API Gateway endpoint.
 
