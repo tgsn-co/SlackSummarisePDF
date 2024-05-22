@@ -41,7 +41,8 @@ docker run -p 9000:8080 SlackSummarisePDF
 
 Deploy the function to AWS Lambda using the AWS CLI or the AWS Management Console. Ensure the environment variables BOT_TOKEN and OPENAI_API_KEY are set in the Lambda configuration.
 
-***Create the Slack App**
+**Create the Slack App**
+
 Go to https://api.slack.com/ and select the “Your Apps” tab on the site. Once on the page choose “Create New App”. You will be presented with a page to name your app and assign it to a workspace.
 Once Created you should be directedc to the “Basic Information” page of your Slack App.
 On the sidebar, under the “Features” heading, select “Bot Users” and complete the fields and “Save Changes”.
@@ -66,19 +67,20 @@ def handler(event, context):
 ```
 Update the Docker image with the new code and push it the AWS Lambda function.
 
-2. **Send a request to the API Gateway**
-
-Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
+2. Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
 
 Our Gateway will now return the “challenge” value in our lambda function.
 
-**Configure Slack Event Subscription:**
+3. Configure your Slack app to subscribe to the file-uploaded event and set the request URL to the API Gateway endpoint.
 
-Configure your Slack app to subscribe to relevant events (e.g., file shared) and set the request URL to the API Gateway endpoint.
+4. Revert the Lambda function back to the orgional image with the working Slack App.
 
-**Revert back to the origional Lambda Function.**
+5. On the Slack App page Go to OAuth and Permissions --> Scopes --> Add chat:write scope.
 
-Revert the Lambda function back to the orgional image with the working Slack App.
+6. Finally, back to “Basic Information” > “Install your app to your workspace” > “Allow”
+   Once that is successful. Restart your slack app and install the app and start messaging and programming your slack bot!
+
+
 
 **Usage**
 
