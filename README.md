@@ -2,7 +2,7 @@
 
 This code creates a Slack app to automatically summarise PDFs in Slack channel using OpenAI ChatGPT and AWS Lambda functions.
 
-Specifically, it allows you to setup a Slack bot that takes in a pdf file, calls an AWS Lambda Function with API Gateway. This Lambda function is triggered by a Slack event. It retrieves a PDF document from Slack, extracts the text from the PDF, uses OpenAI to summarize the text, and posts the summary back to the Slack channel where the document was shared.
+Specifically, it allows you to setup a Slack bot that takes in a pdf file and calls an AWS Lambda Function with API Gateway. This Lambda function is triggered by a Slack event. It retrieves a PDF document from Slack, extracts the text from the PDF, uses OpenAI to summarize the text, and posts the summary back to the Slack channel where the document was shared.
 
 This README provides an overview and setup instructions for an AWS Lambda function that integrates with Slack to retrieve PDF documents, summarize their content using OpenAI, and send the summary back to Slack.
 
@@ -49,7 +49,7 @@ On the sidebar, under the “Features” heading, select “Bot Users” and com
 
 **Configure API Gateway:**
 
-1. Return to the Lambda function and create an API Gateway and configure it to trigger the Lambda function. In order to verify the gateway with Slack change the code in main.py to:
+1. Return to the Lambda function and create an API Gateway and configure it to trigger the Lambda function. In order to verify the gateway with Slack, change the code in main.py to:
 
 ```
 import json
@@ -66,7 +66,7 @@ def handler(event, context):
     }
 ```
 
-    Update the Docker image with the new code and push it the AWS Lambda function.
+Update the Docker image with the new code and push it the AWS Lambda function.
 
 2. Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
     Our Gateway will now return the “challenge” value in our lambda function.
