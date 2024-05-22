@@ -96,4 +96,4 @@ After completing the setup, add the bot to any Slack channel and share a PDF doc
 
 --**AWS problem:** If there is a problem with AWS this shown in the AWS consol for the Lambda function.
 
---**Slack changes:** You should should be notified of any changes to the Slack API by email as a registered APP creator.
+--**Slack changes:** You should should be notified of any changes to the Slack API by email as a registered App creator.
