@@ -1,10 +1,10 @@
 # AWS Lambda Function with API Gateway and Slack Integration
 
+This code allows to automatically summarise PDFs in Slack channel using OpenAI ChatGPT and AWS Lambda functions.
+
+Specifically, it allows you to setup a Slack bot that takes in a pdf file, calls an AWS Lambda Function with API Gateway. This Lambda function is triggered by a Slack event. It retrieves a PDF document from Slack, extracts the text from the PDF, uses OpenAI to summarize the text, and posts the summary back to the Slack channel where the document was shared.
+
 This README provides an overview and setup instructions for an AWS Lambda function that integrates with Slack to retrieve PDF documents, summarize their content using OpenAI, and send the summary back to Slack.
-
-## Overview
-
-This Lambda function is triggered by a Slack event. It retrieves a PDF document from Slack, extracts the text from the PDF, uses OpenAI to summarize the text, and posts the summary back to the Slack channel where the document was shared.
 
 ## Prerequisites
 
@@ -20,7 +20,71 @@ The following environment variables need to be set in the Lambda function config
 - `BOT_TOKEN`: The bot token from your Slack app.
 - `OPENAI_API_KEY`: Your OpenAI API key.
 
-## Likely Failiures
+## Installation and Setup
+**Clone the Repository:**
+```
+git clone https://github.com/tgsn-co/SlackSummarisePDF.git
+cd SlackSummarisePDF
+```
+**Install Dependencies:**
+```
+pip install -r requirements.txt
+```
+**Set Up Docker (if relevant):**
+
+If using Docker for deployment, ensure Docker is installed and running on your machine. Build and run the Docker container:
+```
+docker build -t SlackSummarisePDF .
+docker run -p 9000:8080 SlackSummarisePDF
+```
+**Deploy the Lambda Function:**
+
+Deploy the function to AWS Lambda using the AWS CLI or the AWS Management Console. Ensure the environment variables BOT_TOKEN and OPENAI_API_KEY are set in the Lambda configuration.
+
+***Create the Slack App**
+Go to https://api.slack.com/ and select the “Your Apps” tab on the site. Once on the page choose “Create New App”. You will be presented with a page to name your app and assign it to a workspace.
+Once Created you should be directedc to the “Basic Information” page of your Slack App.
+On the sidebar, under the “Features” heading, select “Bot Users” and complete the fields and “Save Changes”.
+
+**Configure API Gateway:**
+
+1. Return to the Lambda function and create an API Gateway and configure it to trigger the Lambda function. In order to verify the gateway with Slack change the code in main.py to:
+
+```
+import json
+def handler(event, context):
+    print(f"Received event:\n{event}\nWith context:\n{context}")
+    
+    slack_body = event.get("body")
+    slack_event = json.loads(slack_body)
+    challenge_answer = slack_event.get("challenge")
+    
+    return {
+        'statusCode': 200,
+        'body': challenge_answer
+    }
+```
+Update the Docker image with the new code and push it the AWS Lambda function.
+
+2. **Send a request to the API Gateway**
+
+Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
+
+Our Gateway will now return the “challenge” value in our lambda function.
+
+**Configure Slack Event Subscription:**
+
+Configure your Slack app to subscribe to relevant events (e.g., file shared) and set the request URL to the API Gateway endpoint.
+
+**Revert back to the origional Lambda Function.**
+
+Revert the Lambda function back to the orgional image with the working Slack App.
+
+**Usage**
+
+After completing the setup, share a PDF document in a Slack channel. The Lambda function will be triggered, process the PDF, summarize its content using OpenAI, and post the summary back to the Slack channel.
+
+## Potential Source of Errors
 
 --**Failure to retrieve PDF:** Faliure to retrieve the document the get_pdf_text function will return "Failed to retrieve the document." This will be sent to OpenAI, summarised and sent to the channel. This will likely show up in the message.
 
@@ -32,4 +96,4 @@ The following environment variables need to be set in the Lambda function config
 
 --**AWS problem:** If there is a problem with AWS this shown in the AWS consol for the Lambda function.
 
---**Slack changes:** We should be notified of any changes to the Slack API by email as a registered APP creator.
+--**Slack changes:** You should should be notified of any changes to the Slack API by email as a registered APP creator.
