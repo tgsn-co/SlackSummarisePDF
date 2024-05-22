@@ -77,7 +77,7 @@ def handler(event, context):
 
 5. On the Slack App page Go to OAuth and Permissions --> Scopes --> Add chat:write scope.
 
-6. Finally, back to “Basic Information” > “Install your app to your workspace” > “Allow”
+6. Finally, back to “Basic Information” --> “Install your app to your workspace” --> “Allow”
    Once that is successful. Restart your slack app and install the app and start messaging and programming your slack bot!
 
 
