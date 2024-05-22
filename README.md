@@ -44,7 +44,7 @@ Deploy the function to AWS Lambda using the AWS CLI or the AWS Management Consol
 **Create the Slack App**
 
 Go to https://api.slack.com/ and select the “Your Apps” tab on the site. Once on the page choose “Create New App”. You will be presented with a page to name your app and assign it to a workspace.
-Once Created you should be directedc to the “Basic Information” page of your Slack App.
+Once Created you should be directed to the “Basic Information” page of your Slack App.
 On the sidebar, under the “Features” heading, select “Bot Users” and complete the fields and “Save Changes”.
 
 **Configure API Gateway:**
@@ -65,10 +65,10 @@ def handler(event, context):
         'body': challenge_answer
     }
 ```
+
     Update the Docker image with the new code and push it the AWS Lambda function.
 
 2. Copy the link provided in the API Gateway. Return to the Slack App page and enable Event Subscriptions and insert the link. The Slack API will then test the API Gateway and Lambda function.
-
     Our Gateway will now return the “challenge” value in our lambda function.
 
 3. Configure your Slack app to subscribe to the file-uploaded event and set the request URL to the API Gateway endpoint.
@@ -78,19 +78,17 @@ def handler(event, context):
 5. On the Slack App page Go to OAuth and Permissions --> Scopes --> Add chat:write scope.
 
 6. Finally, back to “Basic Information” --> “Install your app to your workspace” --> “Allow”
-   Once that is successful. Restart your slack app and install the app and start messaging and programming your slack bot!
-
-
+   Once that is successful. Restart your slack app and install the app.
 
 **Usage**
 
-After completing the setup, share a PDF document in a Slack channel. The Lambda function will be triggered, process the PDF, summarize its content using OpenAI, and post the summary back to the Slack channel.
+After completing the setup, add the bot to any Slack channel and share a PDF document in the channel. The Lambda function will be triggered, process the PDF, summarise its content using OpenAI, and post the summary back to the Slack channel.
 
 ## Potential Source of Errors
 
 --**Failure to retrieve PDF:** Faliure to retrieve the document the get_pdf_text function will return "Failed to retrieve the document." This will be sent to OpenAI, summarised and sent to the channel. This will likely show up in the message.
 
---**Failure to Extract Text:** If the text cannot be extracted using the PYMuPDF module either an empty string will be returned this will be reflected in the request to OpenAI and the slack message. If an error is thrown the  funtion will stop and an error message will be returned to the CloudWatch Logs.
+--**Failure to Extract Text:** If the text cannot be extracted using the PYMuPDF module either an empty string or an error will be returned. An empty string will be reflected in the request to OpenAI and the slack message. If an error is thrown the funtion will stop and an error message will be returned to the CloudWatch Logs.
 
 --**OpenAI Down:** If OpenAI may respond with an error code which will be posted to Slack.
 
