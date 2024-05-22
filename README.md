@@ -1,6 +1,6 @@
 # AWS Lambda Function with API Gateway and Slack Integration
 
-This code allows to automatically summarise PDFs in Slack channel using OpenAI ChatGPT and AWS Lambda functions.
+This code creates a Slack app that automatically summarise PDFs in Slack channel using OpenAI ChatGPT and AWS Lambda functions.
 
 Specifically, it allows you to setup a Slack bot that takes in a pdf file, calls an AWS Lambda Function with API Gateway. This Lambda function is triggered by a Slack event. It retrieves a PDF document from Slack, extracts the text from the PDF, uses OpenAI to summarize the text, and posts the summary back to the Slack channel where the document was shared.
 
