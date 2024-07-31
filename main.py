@@ -63,9 +63,10 @@ Bulleted List: For a bulleted list, start each item with an asterisk and a space
     )
     return completion.choices[0].message.content
 
-def send_text_response(event_body, response_text, file_info):
+def send_text_response(event_body, response_text, ts):
     "Responds the Slack trigger by posting a response into the chat where the trigger comes from. "
-    print("Messaging Slack...")
+    start_of_message = response_text[:50]
+    print(f"Messaging Slack... {start_of_message}")
     SLACK_URL = "https://slack.com/api/chat.postMessage"
     channel_id = event_body['event']['channel_id']
     data = urllib.parse.urlencode(
@@ -73,6 +74,7 @@ def send_text_response(event_body, response_text, file_info):
             ("token", os.environ["BOT_TOKEN"]),
             ("channel", channel_id),
             ("text", response_text),
+            ("thread_ts", ts)
         )
     )
     data = data.encode("ascii")
@@ -88,21 +90,31 @@ def handler(event, context):
     body = json.loads(event['body'])
     headers = event.get('headers', {})
     if headers.get('X-Slack-Retry-Num') is None:
-        # print(f"body = {body}")
         file_id = body['event']['file']['id']
-        # print(file_id)
         response = client.files_info(file=file_id)
-        # print(f"response = {response}")
         file_info = response['file']
-        
         if file_info['mimetype'] == 'application/pdf':
             private_url = file_info['url_private']
-            
+                        
+            # Attempt to extract ts from private shares
+            shares_private = file_info.get("shares", {}).get("private", {})
+            ts_value = None
+
+            if shares_private:
+                channel_id, details = next(iter(shares_private.items()), (None, None))
+                if details:
+                    ts_value = details[0].get("ts")
+
+            # If ts not found in private, attempt to extract from public shares
+            if ts_value is None:
+                shares_public = file_info.get("shares", {}).get("public", {})
+                if shares_public:
+                    channel_id, details = next(iter(shares_public.items()), (None, None))
+                    if details:
+                        ts_value = details[0].get("ts")
             text = get_pdf_text(private_url)
-            # print(f"text: {text}")
             summary = SlackApp(text)
-            # print(f"summary: {summary}")
-        send_text_response(body, summary, file_info)
+        send_text_response(body, summary, ts_value)
     
     return {
         'statusCode': 200,
